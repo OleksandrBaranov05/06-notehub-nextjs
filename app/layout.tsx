@@ -1,22 +1,23 @@
-import type { ReactNode } from 'react';
+import type { Metadata } from 'next';
+import './globals.css';
 import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
-import './globals.css';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'NoteHub',
-  description: 'Next.js NoteHub',
+  description: 'Notes manager',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <Header />
-        <TanStackProvider>{children}</TanStackProvider>
-        <Footer />
-        <div id="modal-root" />
+        <TanStackProvider>
+          <Header />
+          {children}
+          <Footer />
+        </TanStackProvider>
       </body>
     </html>
   );

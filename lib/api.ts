@@ -1,23 +1,23 @@
-import axios from 'axios';
-import type { AxiosResponse } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import type { Note, NoteTag } from '@/types/note';
 
-const API_BASE = 'https://notehub-public.goit.study/api';
-const NOTES_URL = `${API_BASE}/notes`;
+const BASE_URL = 'https://notehub-public.goit.study/api';
 
-const http = axios.create();
+const http: AxiosInstance = axios.create({
+  baseURL: BASE_URL,
+});
 
 http.interceptors.request.use((config) => {
   const raw = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN as string | undefined;
   const token = raw ? raw.replace(/^['"]|['"]$/g, '').trim() : '';
+  const headers = (config.headers ?? {}) as any;
 
-  const h = (config.headers ?? {}) as any;
-  if (typeof h.set === 'function') {
-    h.set('Authorization', `Bearer ${token}`);
-    h.set('Content-Type', 'application/json');
+  if (typeof (headers as any).set === 'function') {
+    (headers as any).set('Authorization', `Bearer ${token}`);
+    (headers as any).set('Content-Type', 'application/json');
   } else {
     (config as any).headers = {
-      ...h,
+      ...headers,
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
@@ -34,39 +34,36 @@ export interface FetchNotesParams {
 export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
+  page: number;
+  perPage: number;
 }
 
-export interface CreateNoteParams {
+export interface CreateNoteBody {
   title: string;
   content: string;
   tag: NoteTag;
 }
-export type CreateNoteResponse = Note;
-export type DeleteNoteResponse = Note;
 
 export async function fetchNotes(params: FetchNotesParams): Promise<FetchNotesResponse> {
   const { page = 1, perPage = 12, search } = params;
-  const qs = new URLSearchParams({
-    page: String(page),
-    perPage: String(perPage),
-    ...(search ? { search } : {}),
-  }).toString();
-
-  const res = await http.get<FetchNotesResponse>(`${NOTES_URL}?${qs}`);
+  const res = await http.get<FetchNotesResponse>('/notes', {
+    params: { page, perPage, ...(search ? { search } : {}) },
+  });
   return res.data;
 }
 
-export async function createNote(body: CreateNoteParams): Promise<CreateNoteResponse> {
-  const res: AxiosResponse<CreateNoteResponse> = await http.post(NOTES_URL, body);
+export async function createNote(body: CreateNoteBody): Promise<Note> {
+  const res = await http.post<Note>('/notes', body);
   return res.data;
 }
 
-export async function deleteNote(id: number): Promise<DeleteNoteResponse> {
-  const res: AxiosResponse<DeleteNoteResponse> = await http.delete(`${NOTES_URL}/${id}`);
+
+export async function deleteNote(id: string): Promise<Note> {
+  const res = await http.delete<Note>(`/notes/${id}`);
   return res.data;
 }
 
-export async function fetchNoteById(id: number): Promise<Note> {
-  const res: AxiosResponse<Note> = await http.get(`${NOTES_URL}/${id}`);
+export async function fetchNoteById(id: string): Promise<Note> {
+  const res = await http.get<Note>(`/notes/${id}`);
   return res.data;
 }

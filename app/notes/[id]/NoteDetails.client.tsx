@@ -7,16 +7,15 @@ import css from './noteDetails.module.css';
 
 export default function NoteDetailsClient() {
   const params = useParams<{ id?: string | string[] }>();
-
   const idStr = Array.isArray(params?.id) ? params?.id[0] : params?.id;
-  const id = idStr ? Number(idStr) : NaN;
-  const enabled = Number.isFinite(id);
+  const enabled = typeof idStr === 'string' && idStr.length > 0;
 
   const { data: note, isLoading, isError } = useQuery({
-    queryKey: ['note', enabled ? id : 'unknown'],
-    queryFn: () => fetchNoteById(id),
-    enabled,  
+    queryKey: ['note', enabled ? idStr : 'unknown'],
+    queryFn: () => fetchNoteById(idStr as string),
+    enabled,
     retry: false,
+    refetchOnMount: false,
   });
 
   if (!enabled) return <p>Something went wrong.</p>;
