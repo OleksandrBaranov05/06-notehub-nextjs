@@ -44,7 +44,7 @@ export default function NotesClient({
   const totalPages = data?.totalPages ?? 1;
 
   return (
-    <main>
+   <main className={css.app}>
       <div className={css.toolbar}>
         <SearchBox
           value={search}
