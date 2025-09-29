@@ -1,4 +1,3 @@
-// app/notes/Notes.client.tsx
 'use client';
 
 import { useState } from 'react';
@@ -14,9 +13,17 @@ import NoteList from '@/components/NoteList/NoteList';
 
 import css from './notes.module.css';
 
-export default function NotesClient() {
-  const [page, setPage] = useState<number>(1);
-  const [search, setSearch] = useState<string>('');
+export interface NotesClientProps {
+  initialPage?: number;
+  initialSearch?: string;
+}
+
+export default function NotesClient({
+  initialPage = 1,
+  initialSearch = '',
+}: NotesClientProps) {
+  const [page, setPage] = useState<number>(initialPage);
+  const [search, setSearch] = useState<string>(initialSearch);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const [debouncedSearch] = useDebounce(search, 300);
@@ -39,10 +46,13 @@ export default function NotesClient() {
   return (
     <main>
       <div className={css.toolbar}>
-        <SearchBox value={search} onChange={(val) => {
-          setSearch(val);
-          setPage(1);
-        }} />
+        <SearchBox
+          value={search}
+          onChange={(val) => {
+            setSearch(val);
+            setPage(1);
+          }}
+        />
         {totalPages > 1 && (
           <Pagination
             currentPage={page}
@@ -62,7 +72,6 @@ export default function NotesClient() {
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
-          {}
           <NoteForm onCancel={() => setIsModalOpen(false)} />
         </Modal>
       )}
